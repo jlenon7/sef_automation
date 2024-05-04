@@ -25,7 +25,7 @@ export class StartAutomationCommand extends BaseCommand {
 
       if (hasForm) {
         formIsOpen = true
-        setInterval(() => Log.channel('telegram').success('form is open'), ms)
+        setInterval(() => Log.channel('telegram').success('form is open'), 5000)
         /**
          * Keep event loop running so browser will keep open.
          */
