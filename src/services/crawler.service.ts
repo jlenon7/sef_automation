@@ -77,7 +77,7 @@ export class CrawlerService {
       Log.error('error happened while handling browser operations: %o', err)
       Log.warn('retrying in 30 seconds')
       await Exec.sleep(30000)
-      await this.run()
+      return await this.run()
     }
   }
 }
