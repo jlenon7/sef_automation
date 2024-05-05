@@ -67,7 +67,7 @@ export class CrawlerService {
       Log.info(`form is ${hasForm ? 'visible' : 'not visible'}`)
 
       if (hasForm) {
-        await page.locator('id=txtTelephone').fill('911855468')
+        await page.locator('id=txtTelephone').fill(Config.get('sef.cellphone'))
         await page.selectOption('id=Places_List', '3LO')
       }
 
