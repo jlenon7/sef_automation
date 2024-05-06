@@ -1,7 +1,32 @@
 import { Path } from '@athenna/common'
 
 export default {
+  /*
+  |--------------------------------------------------------------------------
+  | Default Log Channel
+  |--------------------------------------------------------------------------
+  |
+  | This option defines the default log channel that gets used when writing
+  | messages to the logs. The name specified in this option should match
+  | one of the channels defined in the "channels" configuration object.
+  |
+  */
+
   default: Env('LOG_CHANNEL', 'stack'),
+
+  /*
+  |--------------------------------------------------------------------------
+  | Log Channels
+  |--------------------------------------------------------------------------
+  |
+  | Here you may configure the log channels for your application.
+  |
+  | Available Drivers:
+  |   "stack", "console", "discord", "file", "null", "slack", "telegram".
+  | Available Formatters:
+  |   "cli", "simple", "json", "request", "message".
+  |
+  */
 
   channels: {
     stack: {
@@ -18,6 +43,13 @@ export default {
 
     discard: {
       driver: 'null'
+    },
+
+    exception: {
+      level: 'trace',
+      formatter: 'none',
+      driver: 'console',
+      streamType: 'stderr'
     },
 
     file: {
@@ -50,12 +82,13 @@ export default {
 
     telegram: {
       driver: 'telegram',
-      formatter: 'message',
-      formatterConfig: {},
+      level: 'fatal',
+      chatId: 0,
+      parseMode: 'HTML',
+      token: 'your-telegram-bot-token',
 
-      token: Env('TELEGRAM_TOKEN'),
-      chatId: Env('TELEGRAM_CHAT_ID'),
-      parseMode: 'HTML'
+      formatter: 'message',
+      formatterConfig: {}
     }
   }
 }
