@@ -1,8 +1,8 @@
 import { chromium } from 'playwright'
 import { Log } from '@athenna/logger'
 import { Service } from '@athenna/ioc'
-import { Config } from '@athenna/config'
 import { Exec } from '@athenna/common'
+import { Config } from '@athenna/config'
 
 @Service()
 export class CrawlerService {
@@ -68,9 +68,36 @@ export class CrawlerService {
       Log.info(`form is ${hasForm ? 'visible' : 'not visible'}`)
 
       if (hasForm) {
-        await page.locator('id=txtTelephone').fill(Config.get('sef.cellphone'))
-        await page.selectOption('id=Places_List', '3LO')
+        const cellphone = Config.get('sef.cellphone')
+
+        Log.info(`defining cellphone ${cellphone}`)
+        await page.locator('id=txtTelephone').fill(cellphone)
+
+        const selectElement = page.locator('select#Places_List')
+        const options = await selectElement.evaluate(select => {
+          const optionElements = select.querySelectorAll('option')
+          return Array.from(optionElements)
+            .map(option => option.value)
+            .filter(Boolean)
+        })
+
+        Log.info('options available %o to select', options)
+
+        const randomIndex = Math.floor(Math.random() * options.length)
+        const selectedOptionValue = options[randomIndex]
+
+        Log.info(`selected ${selectedOptionValue} option`)
+        await selectElement.selectOption({ value: selectedOptionValue })
+
+        Log.info('clicking on first .fc-title available')
         await page.locator('.fc-title').click({ button: 'left' })
+
+        Log.info('clicking on "Marcar" button')
+        await page
+          .locator(
+            'id=ctl00_ctl53_g_948e31d8_a34a_4c4d_aa9f_c457786c05b7_ctl00_btnSubmit'
+          )
+          .click({ button: 'left' })
       }
 
       return { browser, hasForm }
