@@ -70,6 +70,7 @@ export class CrawlerService {
       if (hasForm) {
         await page.locator('id=txtTelephone').fill(Config.get('sef.cellphone'))
         await page.selectOption('id=Places_List', '3LO')
+        await page.locator('.fc-title').click({ button: 'left' })
       }
 
       return { browser, hasForm }
