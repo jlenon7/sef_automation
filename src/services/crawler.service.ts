@@ -98,9 +98,11 @@ export class CrawlerService {
             'id=ctl00_ctl53_g_948e31d8_a34a_4c4d_aa9f_c457786c05b7_ctl00_btnSubmit'
           )
           .click({ button: 'left' })
+
+        return { browser, hasEnrolled: true }
       }
 
-      return { browser, hasForm }
+      return { browser, hasEnrolled: false }
     } catch (err) {
       Log.error('error happened while handling browser operations: %o', err)
       Log.warn('retrying in 30 seconds')

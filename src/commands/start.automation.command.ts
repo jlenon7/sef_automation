@@ -17,15 +17,16 @@ export class StartAutomationCommand extends BaseCommand {
   }
 
   public async handle(): Promise<void> {
-    let formIsOpen = false
-
-    while (!formIsOpen) {
+    while (true) {
       const ms = Number.randomIntFromInterval(15000, 30000)
-      const { browser, hasForm } = await this.crawlerService.run()
+      const { browser, hasEnrolled } = await this.crawlerService.run()
 
-      if (hasForm) {
-        formIsOpen = true
-        setInterval(() => Log.channel('telegram').success('form is open'), 5000)
+      if (hasEnrolled) {
+        setInterval(
+          () => Log.channel('telegram').success('browser is open'),
+          5000
+        )
+
         /**
          * Keep event loop running so browser will keep open.
          */
