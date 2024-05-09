@@ -99,6 +99,13 @@ export class CrawlerService {
           )
           .click({ button: 'left' })
 
+        Log.info('clicking on "Sim" button')
+        await page
+          .locator(
+            'id=ctl00_ctl53_g_948e31d8_a34a_4c4d_aa9f_c457786c05b7_ctl00_btnConfirmCancel'
+          )
+          .click({ button: 'left' })
+
         return { browser, hasEnrolled: true }
       }
 

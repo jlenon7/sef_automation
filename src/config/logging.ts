@@ -82,10 +82,10 @@ export default {
 
     telegram: {
       driver: 'telegram',
-      level: 'fatal',
-      chatId: 0,
+      level: 'debug',
+      chatId: Env('TELEGRAM_CHAT_ID'),
       parseMode: 'HTML',
-      token: 'your-telegram-bot-token',
+      token: Env('TELEGRAM_TOKEN'),
 
       formatter: 'message',
       formatterConfig: {}
