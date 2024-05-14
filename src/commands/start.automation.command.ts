@@ -22,9 +22,11 @@ export class StartAutomationCommand extends BaseCommand {
       const { browser, hasEnrolled } = await this.crawlerService.run()
 
       if (hasEnrolled) {
+        await Log.channel('telegram').success('browser is open')
+
         setInterval(
           () => Log.channel('telegram').success('browser is open'),
-          5000
+          60000
         )
 
         /**

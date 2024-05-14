@@ -90,7 +90,7 @@ export class CrawlerService {
         await selectElement.selectOption({ value: selectedOptionValue })
 
         Log.info('clicking on first .fc-title available')
-        await page.locator('.fc-title').click({ button: 'left' })
+        await page.locator('.fc-title').first().click({ button: 'left' })
 
         Log.info('clicking on "Marcar" button')
         await page
@@ -111,6 +111,15 @@ export class CrawlerService {
 
       return { browser, hasEnrolled: false }
     } catch (err) {
+      const message = err.message
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('&', '&amp')
+
+      Log.channel('telegram').error(
+        'error happened while handling browser operation: %s',
+        message
+      )
       Log.error('error happened while handling browser operations: %o', err)
       Log.warn('retrying in 30 seconds')
       await Exec.sleep(30000)
