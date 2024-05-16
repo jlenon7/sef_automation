@@ -10,7 +10,7 @@ export class CrawlerService {
     try {
       const browser = await chromium.launch({
         args: ['--window-size=1280,720'],
-        headless: false
+        headless: true
       })
 
       let hasForm = false
@@ -51,6 +51,20 @@ export class CrawlerService {
       await page.locator('id=btnNovoAgendamento').click({ button: 'left' })
       Log.info('pressed new appointment button')
 
+      const alreadyHaveAppointment = await page
+        .locator(
+          'id=ctl00_ctl53_g_25d4cf41_7b1b_4721_a599_eb873afd5d19_ctl00_LblCantReschedule'
+        )
+        .isVisible()
+
+      if (alreadyHaveAppointment) {
+        await Log.channel('stack', 'telegram').error(
+          'user already has an appointment. only one can be scheduled'
+        )
+
+        return { browser, hasEnrolled: true }
+      }
+
       Log.info('waiting for appointment form to be visible')
 
       await page
@@ -68,9 +82,13 @@ export class CrawlerService {
       Log.info(`form is ${hasForm ? 'visible' : 'not visible'}`)
 
       if (hasForm) {
+        const logger = Log.channel('stack', 'telegram')
+
+        await logger.info('appointment form is open')
+
         const cellphone = Config.get('sef.cellphone')
 
-        Log.info(`defining cellphone ${cellphone}`)
+        await logger.info(`defining cellphone ${cellphone}`)
         await page.locator('id=txtTelephone').fill(cellphone)
 
         const selectElement = page.locator('select#Places_List')
@@ -81,32 +99,52 @@ export class CrawlerService {
             .filter(Boolean)
         })
 
-        Log.info('options available %o to select', options)
+        await Log.info('options available %o to select', options)
 
         const randomIndex = Math.floor(Math.random() * options.length)
         const selectedOptionValue = options[randomIndex]
 
-        Log.info(`selected ${selectedOptionValue} option`)
+        await logger.info(`selected ${selectedOptionValue} option`)
         await selectElement.selectOption({ value: selectedOptionValue })
 
-        Log.info('clicking on first .fc-title available')
-        await page.locator('.fc-title').first().click({ button: 'left' })
+        const fcTitle = page.locator('.fc-title')
+        const fcTitleCount = await fcTitle.count()
+        await logger.info(
+          `found ${fcTitleCount} appointments available on calendar. clicking on first available`
+        )
+        await fcTitle.first().click({ button: 'left' })
 
-        Log.info('clicking on "Marcar" button')
+        await logger.info('clicking on "Marcar" button')
         await page
           .locator(
             'id=ctl00_ctl53_g_948e31d8_a34a_4c4d_aa9f_c457786c05b7_ctl00_btnSubmit'
           )
           .click({ button: 'left' })
 
-        Log.info('clicking on "Sim" button')
+        await logger.info('clicking on "Sim" button')
         await page
           .locator(
             'id=ctl00_ctl53_g_948e31d8_a34a_4c4d_aa9f_c457786c05b7_ctl00_btnConfirmCancel'
           )
           .click({ button: 'left' })
 
-        return { browser, hasEnrolled: true }
+        const hasEnrolled = await page
+          .locator(
+            'id=ctl00_ctl53_g_948e31d8_a34a_4c4d_aa9f_c457786c05b7_ctl00_lblInfo'
+          )
+          .isVisible()
+
+        if (!hasEnrolled && fcTitleCount >= 2) {
+          await logger.error(
+            `success message has not appeared after form submission, retrying immediately because there are still ${fcTitleCount} appointments available`
+          )
+
+          await browser.close()
+
+          return await this.run()
+        }
+
+        return { browser, hasEnrolled }
       }
 
       return { browser, hasEnrolled: false }
