@@ -99,7 +99,7 @@ export class CrawlerService {
             .filter(Boolean)
         })
 
-        await Log.info('options available %o to select', options)
+        await logger.info('options available %o to select', options)
 
         const randomIndex = Math.floor(Math.random() * options.length)
         const selectedOptionValue = options[randomIndex]
@@ -108,11 +108,11 @@ export class CrawlerService {
         await selectElement.selectOption({ value: selectedOptionValue })
 
         const fcTitle = page.locator('.fc-title')
-        const fcTitleCount = await fcTitle.count()
-        await logger.info(
-          `found ${fcTitleCount} appointments available on calendar. clicking on first available`
-        )
         await fcTitle.first().click({ button: 'left' })
+
+        await logger.info(
+          `found ${await fcTitle.count()} appointments available on calendar. clicking on first available`
+        )
 
         await logger.info('clicking on "Marcar" button')
         await page
@@ -128,23 +128,13 @@ export class CrawlerService {
           )
           .click({ button: 'left' })
 
-        const hasEnrolled = await page
-          .locator(
-            'id=ctl00_ctl53_g_948e31d8_a34a_4c4d_aa9f_c457786c05b7_ctl00_lblInfo'
-          )
-          .isVisible()
+        await logger.success(
+          `appointment probably enrolled, retrying immediately to confirm`
+        )
 
-        if (!hasEnrolled && fcTitleCount >= 2) {
-          await logger.error(
-            `success message has not appeared after form submission, retrying immediately because there are still ${fcTitleCount} appointments available`
-          )
+        await browser.close()
 
-          await browser.close()
-
-          return await this.run()
-        }
-
-        return { browser, hasEnrolled }
+        return await this.run()
       }
 
       return { browser, hasEnrolled: false }
