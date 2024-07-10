@@ -1,7 +1,7 @@
 import { chromium } from 'playwright'
 import { Log } from '@athenna/logger'
 import { Service } from '@athenna/ioc'
-import { Exec } from '@athenna/common'
+import { Exec, Path } from '@athenna/common'
 import { Config } from '@athenna/config'
 
 @Service()
@@ -108,7 +108,13 @@ export class CrawlerService {
         await selectElement.selectOption({ value: selectedOptionValue })
 
         const fcTitle = page.locator('.fc-title')
+        await page.screenshot({
+          path: Path.storage(`screenshots/${Date.now()}.png`)
+        })
         await fcTitle.first().click({ button: 'left' })
+        await page.screenshot({
+          path: Path.storage(`screenshots/${Date.now()}.png`)
+        })
 
         await logger.info(
           `found ${await fcTitle.count()} appointments available on calendar. clicking on first available`

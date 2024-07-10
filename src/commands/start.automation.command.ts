@@ -18,7 +18,7 @@ export class StartAutomationCommand extends BaseCommand {
 
   public async handle(): Promise<void> {
     while (true) {
-      const ms = Number.randomIntFromInterval(15000, 30000)
+      const ms = Number.randomIntFromInterval(5000, 15000)
       const email = Config.get('sef.authEmail')
       const { browser, hasEnrolled } = await this.crawlerService.run()
 
